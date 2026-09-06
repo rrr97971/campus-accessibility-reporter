@@ -32,6 +32,25 @@
   --radius: 10px;
   --radius-sm: 6px;
   --focus-ring: 0 0 0 3px rgba(15, 82, 87, 0.35);
+  --transition-theme: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+[data-theme="dark"] {
+  --color-bg: #12181A;
+  --color-surface: #1B2426;
+  --color-text: #F2F1EA;
+  --color-text-muted: #A9A79C;
+  --color-primary: #4FBFC4;
+  --color-primary-dark: #79DEE3;
+  --color-primary-tint: #16302F;
+  --color-accent: #E08A45;
+  --color-accent-tint: #3A2A1A;
+  --color-border: #2E3A3C;
+  --color-danger: #F2726B;
+  --color-danger-tint: #3A1E1C;
+  --color-success: #63C98A;
+  --color-success-tint: #16301F;
+  --focus-ring: 0 0 0 3px rgba(79, 191, 196, 0.35);
 }
 
 * { box-sizing: border-box; }
@@ -44,6 +63,7 @@ html, body {
   font-family: var(--font-body);
   font-size: 16px;
   line-height: 1.5;
+  transition: var(--transition-theme);
 }
 
 h1, h2, h3, h4 {
@@ -131,6 +151,7 @@ button {
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   padding: var(--space-5);
+  transition: var(--transition-theme);
 }
 
 /* --- Form elements --- */
@@ -150,8 +171,9 @@ input, select, textarea {
   border-radius: var(--radius-sm);
   font-family: inherit;
   font-size: 0.95rem;
-  background: #fff;
+  background: var(--color-surface);
   color: var(--color-text);
+  transition: var(--transition-theme);
 }
 textarea { resize: vertical; min-height: 100px; }
 
@@ -176,6 +198,7 @@ textarea { resize: vertical; min-height: 100px; }
 .gap-4 { gap: var(--space-4); }
 .mt-4 { margin-top: var(--space-4); }
 .mt-6 { margin-top: var(--space-6); }
+.mt-10 { margin-top: 96px; }
 .text-muted { color: var(--color-text-muted); }
 
 .grid-stats {

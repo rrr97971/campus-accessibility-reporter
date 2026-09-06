@@ -19,7 +19,7 @@ export default function Landing() {
         </div>
       </div>
 
-      <div className="grid-stats mt-8">
+      <div className="grid-stats mt-10">
         <div className="card">
           <h3>1. Report</h3>
           <p>Describe the problem, pin the location, attach a photo if you have one.</p>

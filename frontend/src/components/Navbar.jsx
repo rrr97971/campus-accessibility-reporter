@@ -1,8 +1,10 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   function handleLogout() {
@@ -11,7 +13,7 @@ export default function Navbar() {
   }
 
   return (
-    <header style={{ borderBottom: '1px solid var(--color-border)', background: '#fff' }}>
+    <header style={{ borderBottom: '1px solid var(--color-border)', background: 'var(--color-surface)' }}>
       <div className="container row" style={{ justifyContent: 'space-between', height: 68 }}>
         <Link to="/" style={{ textDecoration: 'none', color: 'var(--color-text)' }}>
           <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.15rem' }}>
@@ -46,6 +48,13 @@ export default function Navbar() {
               Log out
             </button>
           )}
+                  <button
+            className="btn btn-secondary"
+            onClick={toggleTheme}
+            aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+          >
+            {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
+          </button>
         </nav>
       </div>
     </header>
