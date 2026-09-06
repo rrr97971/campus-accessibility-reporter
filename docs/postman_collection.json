@@ -1,0 +1,219 @@
+{
+  "info": {
+    "name": "Campus Accessibility Issue Reporter",
+    "description": "Full REST API collection — auth, issues, updates, uploads, admin.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:5000/api" },
+    { "key": "student_token", "value": "" },
+    { "key": "admin_token", "value": "" },
+    { "key": "issue_id", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Riya Sharma\",\n  \"email\": \"riya@campus.edu\",\n  \"password\": \"Password123\"\n}" },
+            "url": { "raw": "{{base_url}}/auth/register", "host": ["{{base_url}}"], "path": ["auth", "register"] }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"riya@campus.edu\",\n  \"password\": \"Password123\"\n}" },
+            "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Issues",
+      "item": [
+        {
+          "name": "Create Issue",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{student_token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"Broken ramp near Block A\",\n  \"description\": \"The ramp has a large crack.\",\n  \"category\": \"Wheelchair Ramp\",\n  \"location_building\": \"Block A\",\n  \"location_area\": \"Main Entrance\"\n}" },
+            "url": { "raw": "{{base_url}}/issues", "host": ["{{base_url}}"], "path": ["issues"] }
+          }
+        },
+        {
+          "name": "Get My Issues",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{student_token}}" }],
+            "url": { "raw": "{{base_url}}/issues", "host": ["{{base_url}}"], "path": ["issues"] }
+          }
+        },
+        {
+          "name": "Get Issue By Id",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{student_token}}" }],
+            "url": { "raw": "{{base_url}}/issues/{{issue_id}}", "host": ["{{base_url}}"], "path": ["issues", "{{issue_id}}"] }
+          }
+        },
+        {
+          "name": "Update Issue",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{student_token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"Updated title\"\n}" },
+            "url": { "raw": "{{base_url}}/issues/{{issue_id}}", "host": ["{{base_url}}"], "path": ["issues", "{{issue_id}}"] }
+          }
+        },
+        {
+          "name": "Delete Issue",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{student_token}}" }],
+            "url": { "raw": "{{base_url}}/issues/{{issue_id}}", "host": ["{{base_url}}"], "path": ["issues", "{{issue_id}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Issue Updates",
+      "item": [
+        {
+          "name": "Get Update History",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{student_token}}" }],
+            "url": { "raw": "{{base_url}}/issues/{{issue_id}}/updates", "host": ["{{base_url}}"], "path": ["issues", "{{issue_id}}", "updates"] }
+          }
+        },
+        {
+          "name": "Create Update (admin only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"new_status\": \"Under Review\",\n  \"comment\": \"Site inspection scheduled.\"\n}" },
+            "url": { "raw": "{{base_url}}/issues/{{issue_id}}/updates", "host": ["{{base_url}}"], "path": ["issues", "{{issue_id}}", "updates"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Uploads",
+      "item": [
+        {
+          "name": "Upload Image",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{student_token}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [{ "key": "image", "type": "file", "src": "" }]
+            },
+            "url": { "raw": "{{base_url}}/uploads/image", "host": ["{{base_url}}"], "path": ["uploads", "image"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Get All Issues",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/admin/issues?status=&priority=&category=&search=",
+              "host": ["{{base_url}}"], "path": ["admin", "issues"],
+              "query": [
+                { "key": "status", "value": "" },
+                { "key": "priority", "value": "" },
+                { "key": "category", "value": "" },
+                { "key": "search", "value": "" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Dashboard Stats",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }],
+            "url": { "raw": "{{base_url}}/admin/dashboard", "host": ["{{base_url}}"], "path": ["admin", "dashboard"] }
+          }
+        },
+        {
+          "name": "Update Status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"Under Review\",\n  \"comment\": \"Site inspection scheduled.\"\n}" },
+            "url": { "raw": "{{base_url}}/admin/issues/{{issue_id}}/status", "host": ["{{base_url}}"], "path": ["admin", "issues", "{{issue_id}}", "status"] }
+          }
+        },
+        {
+          "name": "Update Priority",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"priority\": \"Critical\"\n}" },
+            "url": { "raw": "{{base_url}}/admin/issues/{{issue_id}}/priority", "host": ["{{base_url}}"], "path": ["admin", "issues", "{{issue_id}}", "priority"] }
+          }
+        },
+        {
+          "name": "Assign Issue",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"assigned_to\": \"Maintenance Team A\"\n}" },
+            "url": { "raw": "{{base_url}}/admin/issues/{{issue_id}}/assign", "host": ["{{base_url}}"], "path": ["admin", "issues", "{{issue_id}}", "assign"] }
+          }
+        },
+        {
+          "name": "Delete Issue (admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }],
+            "url": { "raw": "{{base_url}}/admin/issues/{{issue_id}}", "host": ["{{base_url}}"], "path": ["admin", "issues", "{{issue_id}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "System",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/health", "host": ["{{base_url}}"], "path": ["health"] }
+          }
+        }
+      ]
+    }
+  ]
+}

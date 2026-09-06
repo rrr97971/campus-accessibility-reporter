@@ -1,0 +1,16 @@
+const { Pool } = require('pg');
+require('dotenv').config();
+
+// A single shared connection pool for the whole app.
+// pg reuses connections instead of opening a new one per query —
+// important when many users hit the API from different locations.
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false } // required by Neon/Render managed Postgres
+});
+
+pool.on('error', (err) => {
+  console.error('Unexpected error on idle database client', err);
+});
+
+module.exports = pool;
