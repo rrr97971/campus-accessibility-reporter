@@ -44,7 +44,8 @@ export default function Register() {
         </div>
         <div className="field">
           <label htmlFor="email">Campus email</label>
-          <input id="email" name="email" type="email" required value={form.email} onChange={handleChange} />
+          <input id="email" name="email" type="email" required placeholder="yourname@vitstudent.ac.in" value={form.email} onChange={handleChange} />
+          <p className="hint">Must be a @vitstudent.ac.in email address.</p>
         </div>
         <div className="field">
           <label htmlFor="password">Password</label>

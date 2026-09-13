@@ -5,6 +5,14 @@ const { asyncHandler, ApiError } = require('../middleware/errorHandler');
 
 const SALT_ROUNDS = 10;
 
+// Basic structural check (something@something.tld) — catches typos and
+// garbage before we even get to the domain check below.
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+// Only this college's email domain may register — change this if your
+// institution uses a different domain.
+const ALLOWED_EMAIL_DOMAIN = '@vitstudent.ac.in';
+
 function signToken(user) {
   return jwt.sign(
     { id: user.id, role: user.role, name: user.name },
@@ -14,14 +22,17 @@ function signToken(user) {
 }
 
 // POST /api/auth/register
-// Anyone can register as a 'student'. Admin accounts are created
-// manually in the database (or by an existing admin) — not self-service,
-// so a random visitor can never grant themselves admin rights.
 const register = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
 
   if (!name || !email || !password) {
     throw new ApiError(400, 'name, email and password are required');
+  }
+  if (!EMAIL_REGEX.test(email)) {
+    throw new ApiError(400, 'Please enter a valid email address');
+  }
+  if (!email.toLowerCase().endsWith(ALLOWED_EMAIL_DOMAIN)) {
+    throw new ApiError(400, `Only ${ALLOWED_EMAIL_DOMAIN} email addresses can register`);
   }
   if (password.length < 6) {
     throw new ApiError(400, 'password must be at least 6 characters');

@@ -18,6 +18,9 @@ CREATE TABLE users (
     password_hash   VARCHAR(255) NOT NULL,
     role            VARCHAR(20)  NOT NULL DEFAULT 'student'
                         CHECK (role IN ('student', 'admin')),
+    email_verified              BOOLEAN NOT NULL DEFAULT false,
+    verification_token          VARCHAR(255),
+    verification_token_expires  TIMESTAMP,
     created_at      TIMESTAMP NOT NULL DEFAULT NOW()
 );
 

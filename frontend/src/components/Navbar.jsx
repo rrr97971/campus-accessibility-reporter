@@ -48,7 +48,7 @@ export default function Navbar() {
               Log out
             </button>
           )}
-                  <button
+          <button
             className="btn btn-secondary"
             onClick={toggleTheme}
             aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}

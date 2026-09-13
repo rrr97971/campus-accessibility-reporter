@@ -1,7 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import Landing from './pages/Landing';
 import Register from './pages/Register';
@@ -17,10 +17,9 @@ import AdminIssueDetails from './pages/AdminIssueDetails';
 import Profile from './pages/Profile';
 
 function Shell() {
-  const { user } = useAuth();
   return (
     <>
-      <Navbar user={user} />
+      <Navbar />
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/register" element={<Register />} />

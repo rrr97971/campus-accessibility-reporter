@@ -29,10 +29,10 @@ export function AuthProvider({ children }) {
   }
 
   async function register(name, email, password) {
-    const data = await registerUser({ name, email, password });
-    persistSession(data.token, data.user);
-    return data.user;
-  }
+  const data = await registerUser({ name, email, password });
+  persistSession(data.token, data.user);
+  return data.user;
+}
 
   function logout() {
     localStorage.removeItem('token');
