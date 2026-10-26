@@ -8,6 +8,9 @@ const authRouter = require('./routes/auth');
 const uploadsRouter = require('./routes/uploads');
 const adminRouter = require('./routes/admin');
 
+const os = require('os');
+const INSTANCE_ID = process.env.INSTANCE_ID || `${os.hostname()}-${process.pid}`;
+
 const app = express();
 
 // --- Middleware ---
@@ -16,13 +19,25 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// --- Health check (useful for confirming cloud deployment works) ---
+// Track backend instance for load balancing verification (Q1a)
+app.use((req, res, next) => {
+  res.setHeader('X-Served-By', INSTANCE_ID);
+  next();
+});
+
+// --- Health check (useful for confirming cloud deployment works & load balancing) ---
 app.get('/api/health', async (req, res) => {
   try {
     await pool.query('SELECT 1');
-    res.json({ success: true, message: 'API is running', database: 'connected' });
+    res.json({
+      success: true,
+      message: 'API is running',
+      database: 'connected',
+      instance: INSTANCE_ID,
+      timestamp: new Date().toISOString()
+    });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Database not reachable' });
+    res.status(500).json({ success: false, message: 'Database not reachable', instance: INSTANCE_ID });
   }
 });
 

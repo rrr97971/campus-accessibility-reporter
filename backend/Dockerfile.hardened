@@ -1,0 +1,34 @@
+# Hardened Production Dockerfile (Question 2c)
+# Key hardening controls:
+# 1. Multi-stage build (reduces final image surface)
+# 2. Minimal base image (Alpine Linux - musl libc, removes hundreds of OS CVEs)
+# 3. Production-only dependencies (excludes test runners and dev tools)
+# 4. Non-root user execution (USER node - prevents privilege escalation)
+
+# --- Stage 1: Dependency Builder ---
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+
+# --- Stage 2: Final Minimal Runtime ---
+FROM node:20-alpine
+
+# Set production environment
+ENV NODE_ENV=production
+WORKDIR /app
+
+# Copy production node_modules from builder
+COPY --from=builder /app/node_modules ./node_modules
+COPY package*.json ./
+COPY src/ ./src/
+
+# Security Control: Run as non-privileged 'node' user (UID 1000)
+USER node
+
+# Expose internal port
+EXPOSE 5000
+
+# Launch application directly (proper signal handling)
+CMD ["node", "src/server.js"]

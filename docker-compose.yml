@@ -1,0 +1,57 @@
+version: '3.8'
+
+# Campus Accessibility Issue Reporter — Multi-Container Load Balanced Architecture (DA3 Question 1)
+# 3 Backend Replicas + 1 Nginx Reverse Proxy / Load Balancer connected to Neon Cloud DB
+
+services:
+  backend1:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: campus-backend-1
+    env_file:
+      - ./backend/.env
+    environment:
+      - PORT=5000
+      - INSTANCE_ID=backend-instance-1
+      - FRONTEND_ORIGIN=*
+    restart: always
+
+  backend2:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: campus-backend-2
+    env_file:
+      - ./backend/.env
+    environment:
+      - PORT=5000
+      - INSTANCE_ID=backend-instance-2
+      - FRONTEND_ORIGIN=*
+    restart: always
+
+  backend3:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: campus-backend-3
+    env_file:
+      - ./backend/.env
+    environment:
+      - PORT=5000
+      - INSTANCE_ID=backend-instance-3
+      - FRONTEND_ORIGIN=*
+    restart: always
+
+  nginx:
+    image: nginx:alpine
+    container_name: campus-load-balancer
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend1
+      - backend2
+      - backend3
+    restart: always

@@ -16,8 +16,9 @@ router.use(verifyToken);
 router.post('/', createIssue);
 router.get('/', getIssues);
 router.get('/:id', getIssueById);
-router.put('/:id', updateIssue);
-router.delete('/:id', deleteIssue);
+// Restrict Update and Delete APIs to administrative staff/supervisors (Q2b)
+router.put('/:id', requireRole('admin'), updateIssue);
+router.delete('/:id', requireRole('admin'), deleteIssue);
 
 router.get('/:id/updates', getUpdates);
 router.post('/:id/updates', requireRole('admin'), createUpdate);

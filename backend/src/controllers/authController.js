@@ -1,16 +1,16 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { generateSecret, generateURI, verifySync } = require('otplib');
+const QRCode = require('qrcode');
 const pool = require('../config/db');
 const { asyncHandler, ApiError } = require('../middleware/errorHandler');
 
 const SALT_ROUNDS = 10;
 
-// Basic structural check (something@something.tld) — catches typos and
-// garbage before we even get to the domain check below.
+// Basic structural check (something@something.tld)
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
-// Only this college's email domain may register — change this if your
-// institution uses a different domain.
+// Only this college's email domain may register
 const ALLOWED_EMAIL_DOMAIN = '@vitstudent.ac.in';
 
 function signToken(user) {
@@ -60,7 +60,7 @@ const register = asyncHandler(async (req, res) => {
 
 // POST /api/auth/login
 const login = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, totp_token } = req.body;
 
   if (!email || !password) {
     throw new ApiError(400, 'email and password are required');
@@ -77,13 +77,104 @@ const login = asyncHandler(async (req, res) => {
     throw new ApiError(401, 'Invalid email or password');
   }
 
+  // --- Multi-Factor Authentication (TOTP for Q2b) ---
+  if (user.mfa_enabled) {
+    if (!totp_token) {
+      return res.status(200).json({
+        success: true,
+        mfa_required: true,
+        message: 'MFA is enabled. Please provide your 6-digit Authenticator code as totp_token.'
+      });
+    }
+
+    try {
+      const checkResult = verifySync({ token: String(totp_token).trim(), secret: user.mfa_secret });
+      if (!checkResult || !checkResult.valid) {
+        throw new ApiError(401, 'Invalid MFA verification code from Authenticator app');
+      }
+    } catch (err) {
+      throw new ApiError(401, 'Invalid MFA verification code from Authenticator app');
+    }
+  }
+
   const token = signToken(user);
 
   res.json({
     success: true,
     token,
-    user: { id: user.id, name: user.name, email: user.email, role: user.role }
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      mfa_enabled: !!user.mfa_enabled
+    }
   });
 });
 
-module.exports = { register, login };
+// POST /api/auth/mfa/setup (Requires auth token)
+const setupMfa = asyncHandler(async (req, res) => {
+  const userRes = await pool.query('SELECT id, email, mfa_enabled FROM users WHERE id = $1', [req.user.id]);
+  const user = userRes.rows[0];
+  if (!user) throw new ApiError(404, 'User not found');
+
+  const secret = generateSecret();
+  const otpauth = generateURI({
+    issuer: 'CampusAccessibility',
+    label: user.email,
+    secret
+  });
+  const qrCodeUrl = await QRCode.toDataURL(otpauth);
+
+  await pool.query('UPDATE users SET mfa_secret = $1 WHERE id = $2', [secret, req.user.id]);
+
+  res.json({
+    success: true,
+    message: 'Scan this QR code with Google Authenticator or Microsoft Authenticator',
+    secret,
+    otpauth_url: otpauth,
+    qr_code_image: qrCodeUrl
+  });
+});
+
+// POST /api/auth/mfa/verify (Requires auth token)
+const verifyMfa = asyncHandler(async (req, res) => {
+  const { token } = req.body;
+  if (!token) throw new ApiError(400, '6-digit verification token is required');
+
+  const userRes = await pool.query('SELECT mfa_secret FROM users WHERE id = $1', [req.user.id]);
+  const user = userRes.rows[0];
+  if (!user || !user.mfa_secret) {
+    throw new ApiError(400, 'MFA setup has not been initiated for this account');
+  }
+
+  try {
+    const checkResult = verifySync({ token: String(token).trim(), secret: user.mfa_secret });
+    if (!checkResult || !checkResult.valid) {
+      throw new ApiError(400, 'Invalid TOTP verification code');
+    }
+  } catch (err) {
+    throw new ApiError(400, 'Invalid TOTP verification code');
+  }
+
+  await pool.query('UPDATE users SET mfa_enabled = true WHERE id = $1', [req.user.id]);
+
+  res.json({
+    success: true,
+    message: 'MFA successfully verified and activated. Future logins will require Authenticator code.'
+  });
+});
+
+// GET /api/auth/mfa/status (Requires auth token)
+const getMfaStatus = asyncHandler(async (req, res) => {
+  const userRes = await pool.query('SELECT mfa_enabled FROM users WHERE id = $1', [req.user.id]);
+  res.json({ success: true, mfa_enabled: !!userRes.rows[0]?.mfa_enabled });
+});
+
+module.exports = {
+  register,
+  login,
+  setupMfa,
+  verifyMfa,
+  getMfaStatus
+};
