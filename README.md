@@ -5,7 +5,7 @@ A cloud-based accessibility barrier reporting and remediation management platfor
 - **Live Application (Frontend):** [https://campus-accessibility-reporter.vercel.app](https://campus-accessibility-reporter.vercel.app)
 - **Live REST API (Backend):** [https://campus-accessibility-backend.onrender.com/api](https://campus-accessibility-backend.onrender.com/api)
 - **Live Health & Database Status:** [https://campus-accessibility-backend.onrender.com/api/health](https://campus-accessibility-backend.onrender.com/api/health)
-- **Git Branch:** `assignment-3` (Digital Assignment 3 Submission)
+- **Git Branch:** `assignment-3`
 
 ---
 
@@ -61,13 +61,12 @@ campus-accessibility-reporter/
 ├── nginx/
 │   └── nginx.conf           # Load balancer round-robin upstream configuration
 ├── scripts/
-│   ├── run_da3_tests.js     # Complete DA3 benchmarking & failover evaluation suite
+│   ├── run_da3_tests.js     # Benchmarking & failover evaluation suite
 │   ├── cluster_simulator.js # Multi-instance local cluster & proxy simulator
 │   ├── load_test.js         # HTTP load testing engine (1,000 requests)
-│   └── seed_vit_chennai.js  # Automated database seed utility
+│   └── seed_vit_chennai.js  # Database seed utility
 ├── docker-compose.yml       # 3-Replica backend cluster + Nginx load balancer
-├── render.yaml              # Render cloud infrastructure blueprint
-└── docs/                    # Technical reports, test logs, and demo scripts
+└── render.yaml              # Render cloud infrastructure blueprint
 ```
 
 ---
@@ -100,35 +99,23 @@ npm run dev             # Frontend opens on http://localhost:5173
 
 ---
 
-## Digital Assignment 3 (DA3) Evaluation Commands
+## Evaluation Commands
 
-### Option A: Run Multi-Container Architecture via Docker Compose
+### Multi-Container Architecture via Docker Compose
 Launches 3 backend instances (`campus-backend-1`, `2`, `3`) behind an Nginx load balancer:
 ```bash
 docker-compose up --build
 # Nginx Load Balancer accessible on: http://localhost:8080/api/health
 ```
 
-### Option B: Run Automated Benchmark & Fault-Tolerance Suite
+### Benchmark & Fault-Tolerance Suite
 Executes the automated 1,000-request benchmark, round-robin load distribution validation, and zero-downtime failover demonstration:
 ```bash
 node scripts/run_da3_tests.js
 ```
 
-### Option C: Run MFA & RBAC Verification Test
+### MFA & RBAC Verification Test
 Tests RFC 6238 TOTP Two-Factor Authentication and role-based route protection:
 ```bash
 node backend/tests/test_mfa.js
 ```
-
----
-
-## Documentation Index
-
-- [**DA3 Full Report (`docs/DA3_Report.md`)**](docs/DA3_Report.md) — Comprehensive submission report for Digital Assignment 3 covering:
-  - Question 1: Peak-Demand Scenario, 3-Instance Nginx Architecture, Load Testing (1,000 reqs), and Zero-Downtime Failover.
-  - Question 2: Cloud Bursting & Edge/Fog Architecture, Salted Hash & TOTP MFA, Role-Based Access Control, Container Hardening, and Trivy CVE Remediation.
-- [**DA3 Video Demonstration Script (`docs/DA3_Demo_Video_Script.md`)**](docs/DA3_Demo_Video_Script.md) — Step-by-step video script and walkthrough.
-- [**Deployment Guide (`docs/deployment-guide.md`)**](docs/deployment-guide.md) — Cloud setup and deployment walkthrough (Neon + Render + Vercel + Cloudinary).
-- [**Architecture & System Plan (`docs/01_architecture_and_plan.md`)**](docs/01_architecture_and_plan.md) — Initial system design, entity relations, and REST API specification.
-- [**Test Case Matrix (`docs/testing-table.md`)**](docs/testing-table.md) — Comprehensive functional test cases and test automation scripts.

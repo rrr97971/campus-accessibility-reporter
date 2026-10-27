@@ -39,3 +39,8 @@ Thumbs.db
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Local Documentation & Reports (Kept locally only, not committed)
+docs/
+*.pdf
+*.docx
