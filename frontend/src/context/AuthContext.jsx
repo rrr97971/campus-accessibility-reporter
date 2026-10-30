@@ -22,8 +22,11 @@ export function AuthProvider({ children }) {
     setUser(user);
   }
 
-  async function login(email, password) {
-    const data = await loginUser({ email, password });
+  async function login(email, password, totp_token) {
+    const data = await loginUser({ email, password, totp_token });
+    if (data.mfa_required) {
+      return { mfa_required: true, message: data.message };
+    }
     persistSession(data.token, data.user);
     return data.user;
   }

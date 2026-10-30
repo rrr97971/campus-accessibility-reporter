@@ -3,8 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
-  const [form, setForm] = useState({ email: '', password: '' });
+  const [form, setForm] = useState({ email: '', password: '', totp_token: '' });
   const [showPassword, setShowPassword] = useState(false);
+  const [mfaPrompt, setMfaPrompt] = useState(false);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const { login } = useAuth();
@@ -19,10 +20,20 @@ export default function Login() {
     setError('');
     setSubmitting(true);
     try {
-      const user = await login(form.email, form.password);
-      navigate(user.role === 'admin' ? '/admin/dashboard' : '/dashboard');
+      const res = await login(form.email, form.password, form.totp_token);
+      if (res?.mfa_required) {
+        setMfaPrompt(true);
+        setError(res.message || 'MFA is enabled. Enter your 6-digit Authenticator code.');
+        return;
+      }
+      navigate(res.role === 'admin' ? '/admin/dashboard' : '/dashboard');
     } catch (err) {
-      setError(err.response?.data?.error || 'Something went wrong. Please try again.');
+      const msg =
+        err.response?.data?.error ||
+        err.response?.data?.message ||
+        (err.request ? 'Unable to reach server. Please check your connection or backend status.' : err.message) ||
+        'Something went wrong. Please try again.';
+      setError(msg);
     } finally {
       setSubmitting(false);
     }
@@ -35,13 +46,13 @@ export default function Login() {
 
       <form className="card" onSubmit={handleSubmit}>
         {error && (
-          <div className="field" style={{ background: 'var(--color-danger-tint)', color: 'var(--color-danger)', padding: 12, borderRadius: 'var(--radius-sm)' }}>
+          <div className="field" style={{ background: mfaPrompt && !form.totp_token ? 'var(--color-info-tint, rgba(59, 130, 246, 0.1))' : 'var(--color-danger-tint)', color: mfaPrompt && !form.totp_token ? 'var(--color-primary, #3b82f6)' : 'var(--color-danger)', padding: 12, borderRadius: 'var(--radius-sm)' }}>
             {error}
           </div>
         )}
         <div className="field">
           <label htmlFor="email">Email</label>
-          <input id="email" name="email" type="email" required value={form.email} onChange={handleChange} />
+          <input id="email" name="email" type="email" required value={form.email} onChange={handleChange} disabled={mfaPrompt} />
         </div>
         <div className="field">
           <label htmlFor="password">Password</label>
@@ -53,6 +64,7 @@ export default function Login() {
               required
               value={form.password}
               onChange={handleChange}
+              disabled={mfaPrompt}
               style={{ paddingRight: 42 }}
             />
             <button
@@ -89,8 +101,28 @@ export default function Login() {
             </button>
           </div>
         </div>
+
+        {mfaPrompt && (
+          <div className="field">
+            <label htmlFor="totp_token">6-Digit Authenticator Code</label>
+            <input
+              id="totp_token"
+              name="totp_token"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]{6}"
+              maxLength={6}
+              placeholder="e.g. 123456"
+              required
+              autoFocus
+              value={form.totp_token}
+              onChange={handleChange}
+            />
+          </div>
+        )}
+
         <button type="submit" className="btn btn-primary btn-block" disabled={submitting}>
-          {submitting ? 'Logging in…' : 'Log in'}
+          {submitting ? 'Verifying…' : (mfaPrompt ? 'Verify & Log in' : 'Log in')}
         </button>
       </form>
 
